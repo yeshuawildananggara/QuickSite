@@ -89,6 +89,12 @@ body {
     animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
+.hero-note {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #64748b; /* soft gray */
+}
+
 /* Buttons */
 .btn {
     display: inline-block;
@@ -997,3 +1003,4 @@ body {
         grid-template-columns: 1fr 1fr;
     }
 }
+
