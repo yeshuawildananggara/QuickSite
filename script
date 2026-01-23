@@ -1,0 +1,492 @@
+// Form validation helpers
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function validatePhone(phone) {
+    if (!phone) return true; // Optional field
+    const re = /^[\d\s\-\(\)]+$/;
+    return re.test(phone) && phone.replace(/\D/g, '').length >= 10;
+}
+
+function validateCardNumber(cardNumber) {
+    const cleaned = cardNumber.replace(/\s/g, '');
+    return /^\d{13,19}$/.test(cleaned);
+}
+
+function validateExpiry(expiry) {
+    const re = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!re.test(expiry)) return false;
+    const [month, year] = expiry.split('/');
+    const expiryDate = new Date(2000 + parseInt(year), parseInt(month) - 1);
+    return expiryDate > new Date();
+}
+
+function validateCVC(cvc) {
+    return /^\d{3,4}$/.test(cvc);
+}
+
+function showError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input && error) {
+        input.classList.add('error');
+        error.textContent = message;
+        error.style.display = 'block';
+    }
+}
+
+function clearError(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input && error) {
+        input.classList.remove('error');
+        error.textContent = '';
+        error.style.display = 'none';
+    }
+}
+
+// Format card number with spaces
+function formatCardNumber(value) {
+    const cleaned = value.replace(/\s/g, '');
+    const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
+    return formatted.substring(0, 19);
+}
+
+// Format expiry date
+function formatExpiry(value) {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length >= 2) {
+        return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
+    }
+    return cleaned;
+}
+
+// Multi-step form handling
+document.addEventListener('DOMContentLoaded', function() {
+    const orderForm = document.getElementById('orderForm');
+    const checkoutForm = document.getElementById('checkoutForm');
+    
+    // Order form multi-step logic
+    if (orderForm) {
+        let currentStep = 1;
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const progressSteps = document.querySelectorAll('.progress-step');
+        
+        // Validate Step 1
+        function validateStep1() {
+            let isValid = true;
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            // Validate name
+            if (!name) {
+                showError('name', 'nameError', 'Name is required');
+                isValid = false;
+            } else if (name.length < 2) {
+                showError('name', 'nameError', 'Name must be at least 2 characters');
+                isValid = false;
+            } else {
+                clearError('name', 'nameError');
+            }
+            
+            // Validate email
+            if (!email) {
+                showError('email', 'emailError', 'Email is required');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError('email', 'emailError', 'Please enter a valid email address');
+                isValid = false;
+            } else {
+                clearError('email', 'emailError');
+            }
+            
+            // Validate phone (optional)
+            if (phone && !validatePhone(phone)) {
+                showError('phone', 'phoneError', 'Please enter a valid phone number');
+                isValid = false;
+            } else {
+                clearError('phone', 'phoneError');
+            }
+            
+            return isValid;
+        }
+        
+        // Validate Step 2
+        function validateStep2() {
+            let isValid = true;
+            const businessName = document.getElementById('businessName').value.trim();
+            const plan = document.getElementById('plan').value;
+            const businessDescription = document.getElementById('businessDescription').value.trim();
+            
+            // Validate business name
+            if (!businessName) {
+                showError('businessName', 'businessNameError', 'Business name is required');
+                isValid = false;
+            } else if (businessName.length < 2) {
+                showError('businessName', 'businessNameError', 'Business name must be at least 2 characters');
+                isValid = false;
+            } else {
+                clearError('businessName', 'businessNameError');
+            }
+            
+            // Validate plan
+            if (!plan) {
+                showError('plan', 'planError', 'Please select a plan');
+                isValid = false;
+            } else {
+                clearError('plan', 'planError');
+            }
+            
+            // Validate description
+            if (!businessDescription) {
+                showError('businessDescription', 'businessDescriptionError', 'Please describe your business');
+                isValid = false;
+            } else if (businessDescription.length < 10) {
+                showError('businessDescription', 'businessDescriptionError', 'Description must be at least 10 characters');
+                isValid = false;
+            } else {
+                clearError('businessDescription', 'businessDescriptionError');
+            }
+            
+            return isValid;
+        }
+        
+        // Next button click
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                if (validateStep1()) {
+                    currentStep = 2;
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    progressSteps[0].classList.remove('active');
+                    progressSteps[1].classList.add('active');
+                }
+            });
+        }
+        
+        // Back button click
+        if (backBtn) {
+            backBtn.addEventListener('click', function() {
+                currentStep = 1;
+                step1.classList.add('active');
+                step2.classList.remove('active');
+                progressSteps[0].classList.add('active');
+                progressSteps[1].classList.remove('active');
+            });
+        }
+        
+        // Form submission
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateStep2()) {
+                // Store form data in sessionStorage
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    businessName: document.getElementById('businessName').value.trim(),
+                    plan: document.getElementById('plan').value,
+                    businessDescription: document.getElementById('businessDescription').value.trim()
+                };
+                
+                sessionStorage.setItem('orderData', JSON.stringify(formData));
+                
+                // Redirect to checkout
+                window.location.href = 'checkout.html';
+            }
+        });
+        
+        // Real-time validation for Step 1
+        const step1Inputs = ['name', 'email', 'phone'];
+        step1Inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('blur', function() {
+                    if (currentStep === 1) {
+                        validateStep1();
+                    }
+                });
+            }
+        });
+        
+        // Real-time validation for Step 2
+        const step2Inputs = ['businessName', 'plan', 'businessDescription'];
+        step2Inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('change', function() {
+                    if (currentStep === 2) {
+                        validateStep2();
+                    }
+                });
+                input.addEventListener('blur', function() {
+                    if (currentStep === 2) {
+                        validateStep2();
+                    }
+                });
+            }
+        });
+    }
+    
+    // Checkout page logic
+    if (checkoutForm) {
+        // Load order data from sessionStorage
+        const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
+        
+        // Redirect if no order data
+        if (!orderData.plan) {
+            window.location.href = 'order.html';
+            return;
+        }
+        
+        if (orderData.plan) {
+            const planNames = {
+                'basic': 'Basic - $49',
+                'standard': 'Standard - $99',
+                'pro': 'Pro - $149'
+            };
+            const planPrices = {
+                'basic': 49,
+                'standard': 99,
+                'pro': 149
+            };
+            
+            document.getElementById('summaryPlan').textContent = planNames[orderData.plan] || '-';
+            document.getElementById('summaryBusiness').textContent = orderData.businessName || '-';
+            document.getElementById('summarySubtotal').textContent = '$' + planPrices[orderData.plan];
+            document.getElementById('summaryTotal').textContent = '$' + planPrices[orderData.plan];
+        }
+        
+        // Card number formatting
+        const cardNumberInput = document.getElementById('cardNumber');
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', function(e) {
+                e.target.value = formatCardNumber(e.target.value);
+            });
+        }
+        
+        // Expiry date formatting
+        const expiryInput = document.getElementById('cardExpiry');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function(e) {
+                e.target.value = formatExpiry(e.target.value);
+            });
+        }
+        
+        // CVC - numbers only
+        const cvcInput = document.getElementById('cardCVC');
+        if (cvcInput) {
+            cvcInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+            });
+        }
+        
+        // ZIP - alphanumeric
+        const zipInput = document.getElementById('billingZip');
+        if (zipInput) {
+            zipInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
+            });
+        }
+        
+        // Validate checkout form
+        function validateCheckout() {
+            let isValid = true;
+            const cardName = document.getElementById('cardName').value.trim();
+            const cardNumber = document.getElementById('cardNumber').value.trim();
+            const cardExpiry = document.getElementById('cardExpiry').value.trim();
+            const cardCVC = document.getElementById('cardCVC').value.trim();
+            const billingAddress = document.getElementById('billingAddress').value.trim();
+            const billingCity = document.getElementById('billingCity').value.trim();
+            const billingZip = document.getElementById('billingZip').value.trim();
+            
+            // Validate card name
+            if (!cardName) {
+                showError('cardName', 'cardNameError', 'Name on card is required');
+                isValid = false;
+            } else {
+                clearError('cardName', 'cardNameError');
+            }
+            
+            // Validate card number
+            if (!cardNumber) {
+                showError('cardNumber', 'cardNumberError', 'Card number is required');
+                isValid = false;
+            } else if (!validateCardNumber(cardNumber)) {
+                showError('cardNumber', 'cardNumberError', 'Please enter a valid card number');
+                isValid = false;
+            } else {
+                clearError('cardNumber', 'cardNumberError');
+            }
+            
+            // Validate expiry
+            if (!cardExpiry) {
+                showError('cardExpiry', 'cardExpiryError', 'Expiry date is required');
+                isValid = false;
+            } else if (!validateExpiry(cardExpiry)) {
+                showError('cardExpiry', 'cardExpiryError', 'Please enter a valid expiry date (MM/YY)');
+                isValid = false;
+            } else {
+                clearError('cardExpiry', 'cardExpiryError');
+            }
+            
+            // Validate CVC
+            if (!cardCVC) {
+                showError('cardCVC', 'cardCVCError', 'CVC is required');
+                isValid = false;
+            } else if (!validateCVC(cardCVC)) {
+                showError('cardCVC', 'cardCVCError', 'Please enter a valid CVC');
+                isValid = false;
+            } else {
+                clearError('cardCVC', 'cardCVCError');
+            }
+            
+            // Validate address
+            if (!billingAddress) {
+                showError('billingAddress', 'billingAddressError', 'Billing address is required');
+                isValid = false;
+            } else {
+                clearError('billingAddress', 'billingAddressError');
+            }
+            
+            // Validate city
+            if (!billingCity) {
+                showError('billingCity', 'billingCityError', 'City is required');
+                isValid = false;
+            } else {
+                clearError('billingCity', 'billingCityError');
+            }
+            
+            // Validate ZIP
+            if (!billingZip) {
+                showError('billingZip', 'billingZipError', 'ZIP code is required');
+                isValid = false;
+            } else {
+                clearError('billingZip', 'billingZipError');
+            }
+            
+            return isValid;
+        }
+        
+        // Checkout form submission
+        checkoutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateCheckout()) {
+                // Hide form, show success
+                checkoutForm.style.display = 'none';
+                document.querySelector('.checkout-content').style.display = 'none';
+                const successMessage = document.getElementById('checkoutSuccess');
+                if (successMessage) {
+                    successMessage.style.display = 'block';
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                // Clear session storage
+                sessionStorage.removeItem('orderData');
+            }
+        });
+        
+        // Real-time validation
+        const checkoutInputs = ['cardName', 'cardNumber', 'cardExpiry', 'cardCVC', 'billingAddress', 'billingCity', 'billingZip'];
+        checkoutInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('blur', function() {
+                    validateCheckout();
+                });
+            }
+        });
+    }
+    
+    // Scroll-triggered animations (for index.html)
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    
+    // Add fade-in class to sections and observe them
+    const sections = document.querySelectorAll('section:not(.hero):not(.order-page):not(.checkout-page)');
+    sections.forEach(section => {
+        section.classList.add('fade-in');
+        observer.observe(section);
+    });
+    
+    // Animate list items with delay
+    const listItems = document.querySelectorAll('.bullet-list li, .pricing-features li, .add-ons-list li');
+    listItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-10px)';
+        item.style.transition = `opacity 0.4s ease ${index * 0.1}s, transform 0.4s ease ${index * 0.1}s`;
+    });
+    
+    const listObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateX(0)';
+            }
+        });
+    }, observerOptions);
+    
+    listItems.forEach(item => {
+        listObserver.observe(item);
+    });
+    
+    // Animate pricing cards with stagger
+    const pricingCards = document.querySelectorAll('.pricing-card');
+    pricingCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = `opacity 0.6s ease ${index * 0.15}s, transform 0.6s ease ${index * 0.15}s`;
+    });
+    
+    const cardsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    pricingCards.forEach(card => {
+        cardsObserver.observe(card);
+    });
+    
+    // Animate steps with stagger
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        step.style.opacity = '0';
+        step.style.transform = 'translateY(20px)';
+        step.style.transition = `opacity 0.6s ease ${index * 0.2}s, transform 0.6s ease ${index * 0.2}s`;
+    });
+    
+    const stepsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    steps.forEach(step => {
+        stepsObserver.observe(step);
+    });
+});

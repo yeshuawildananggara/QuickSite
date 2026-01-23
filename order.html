@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order - QuickSite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section class="order-page">
+        <div class="container">
+            <h1>Let's get your site done</h1>
+            <p class="subheadline">Send us your business info and we'll build your website. Simple as that.</p>
+            
+            <!-- Progress indicator -->
+            <div class="form-progress">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Your Info</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Business Details</span>
+                </div>
+            </div>
+            
+            <form id="orderForm" class="order-form">
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step1">
+                    <h2>Step 1: Your Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="name">Name <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required>
+                        <span class="error-message" id="nameError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required>
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone (optional)</label>
+                        <input type="tel" id="phone" name="phone">
+                        <span class="error-message" id="phoneError"></span>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="nextBtn">Next →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Business Details -->
+                <div class="form-step" id="step2">
+                    <h2>Step 2: Business Details</h2>
+                    
+                    <div class="form-group">
+                        <label for="businessName">Business name <span class="required">*</span></label>
+                        <input type="text" id="businessName" name="businessName" required>
+                        <span class="error-message" id="businessNameError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plan">Select Plan <span class="required">*</span></label>
+                        <select id="plan" name="plan" required>
+                            <option value="">Choose a plan...</option>
+                            <option value="basic">Basic - $49</option>
+                            <option value="standard">Standard - $99</option>
+                            <option value="pro">Pro - $149</option>
+                        </select>
+                        <span class="error-message" id="planError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="businessDescription">Describe your business <span class="required">*</span></label>
+                        <textarea id="businessDescription" name="businessDescription" rows="5" required placeholder="Tell us about your business, what you do, and what you need on your website..."></textarea>
+                        <span class="error-message" id="businessDescriptionError"></span>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="backBtn">← Back</button>
+                        <button type="submit" class="btn btn-primary">Continue to Checkout</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div id="successMessage" class="success-message" style="display: none;">
+                <p>Thanks! Your request has been received. We'll contact you within 24 hours via email to get started.</p>
+            </div>
+            
+            <p class="order-note">We communicate by email to keep everything fast and documented. Response time: within 24 hours.</p>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>QuickSite</h3>
+                    <p>Simple websites, fast.</p>
+                </div>
+                <div class="footer-contact">
+                    <p>Response time: within 24 hours</p>
+                    <p>Email communication only</p>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; 2024 QuickSite. A small, independent web service.</p>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
